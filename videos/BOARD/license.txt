@@ -1,0 +1,11 @@
+Model Information:
+* title:	Black Board Blend
+* source:	https://sketchfab.com/3d-models/black-board-blend-aa0d409a73cc448db9a620aece0f8a34
+* author:	GODZILLA (https://sketchfab.com/fatema.urme1305)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Black Board Blend" (https://sketchfab.com/3d-models/black-board-blend-aa0d409a73cc448db9a620aece0f8a34) by GODZILLA (https://sketchfab.com/fatema.urme1305) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

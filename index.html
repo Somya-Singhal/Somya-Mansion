@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Somya's Mansion</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			container{
+				overflow: hidden;
+				margin: 0px;
+				background-image: url('./videos/imag.jpg');
+				background-size:   cover;                 
+				background-repeat: no-repeat;
+ 
+ 
+			}
+			#blocker{
+				position: absolute;
+				top: 0
+				left: 0;
+				bottom: 0;
+				right: 0;
+			}
+            .progress-bar-container{
+                position:absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.8);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items:center;
+
+            }
+            #progress-bar{
+                width: 30%;
+                margin-top: 0.5%;
+                height: 2%;
+            }
+            label{
+                color:white;
+                font-size: 2rem;
+            }
+            
+		</style>
+	</head>
+	<body>
+        <div class="progress-bar-container">
+            <label for="progress-bar">Loading...</label>
+            <progress id="progress-bar" value ="0" max="100"></progress>
+        </div>
+        <div id="container"></div>
+		<div id="blocker"></div>
+
+		<!-- Import maps polyfill -->
+		<!-- Remove this when import maps will be widely supported -->
+		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./build/three.module.js"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+			import { TrackballControls } from './jsm/controls/TrackballControls.js';
+			import { CSS3DRenderer, CSS3DObject } from './jsm/renderers/CSS3DRenderer.js';
+			import { MTLLoader } from './jsm/loaders/MTLLoader.js';
+			import { OBJLoader } from './jsm/loaders/OBJLoader.js';
+			import { FontLoader } from './jsm/loaders/FontLoader.js';
+			import { TextGeometry } from './jsm/geometries/TextGeometry.js';
+
+			const SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 1024;
+			let camera, controls, scene, renderer,renderer2;
+			let container, stats,light;
+			let model;
+			let k=1;
+			const FLOOR = - 250;
+			var stars = [];
+			const clock = new THREE.Clock();
+			function Element( id, x, y, z, ry , rx, rz) {
+
+				const div = document.createElement( 'div' );
+				div.style.width = '480px';
+				div.style.height = '360px';
+				div.style.backgroundColor = '#898AA6';
+
+				const iframe = document.createElement( 'iframe' );
+				
+				iframe.style.width = '480px';
+				iframe.style.height = '360px';
+				iframe.style.border = '1px solid #9ecaed';
+				
+				iframe.src = 'a.html';
+				div.appendChild( iframe );
+
+				const object = new CSS3DObject( div );
+				object.position.set( x, y, z );
+				object.rotation.y = ry;
+				object.rotation.x = rx;
+				object.rotation.z = rz;
+				object.scale.set(.65,.65,.65);
+
+				return object;
+
+			}
+
+			init();
+			animate();
+			addSphere();
+			render();
+
+			function init() {
+				
+				const container = document.getElementById( 'container' );
+
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 1, 5000 );
+				camera.position.set( 1100, 400, 500 );
+				const ambientLight = new THREE.AmbientLight( 0xa3e8ff, 0.4 );
+				scene = new THREE.Scene();
+				
+				scene.fog = new THREE.FogExp2( 0xccddff, .0003 );
+				scene.add( ambientLight );
+
+				light = new THREE.SpotLight( 0xab5cff, 10, 0, Math.PI / 5, 0.3 );
+				light.position.set(-60, 420, 70);
+				light.target.position.set( -60, 0,70);
+
+				light.castShadow = true;
+				light.shadow.camera.near = 1200;
+				light.shadow.camera.far = 2500;
+				light.shadow.bias = 0.0001;
+				light.shadow.mapSize.width = SHADOW_MAP_WIDTH;
+				light.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
+				scene.add( light );
+				scene.add( light.target );
+				let light2 = new THREE.SpotLight( 0xffffff,1.5, 0, Math.PI / 3, 0.3 );
+				light2.position.set(800, 100, 0);
+				light2.target.position.set( 0, 0,0);
+
+				light2.castShadow = true;
+				light2.shadow.camera.near = 1200;
+				light2.shadow.camera.far = 2500;
+				light2.shadow.bias = 0.0001;
+				light2.shadow.mapSize.width = SHADOW_MAP_WIDTH;
+				light2.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
+				scene.add( light2 );
+				scene.add( light2.target );
+				
+				const geometry = new THREE.PlaneGeometry( 100, 100 );
+				const planeMaterial = new THREE.MeshPhongMaterial( { color: 0x000000 } );
+
+				const ground = new THREE.Mesh( geometry, planeMaterial );
+
+				ground.position.set( 0, 6, 0 );
+				ground.rotation.x = - Math.PI / 2;
+				ground.scale.set( 100, 100, 100 );
+
+				ground.castShadow = false;
+				ground.receiveShadow = true;
+
+				scene.add( ground );
+	
+				const ground2 = new THREE.Mesh( geometry, planeMaterial );
+
+				ground2.position.set( -1000, 0, 0 );
+				ground2.rotation.y = 3.14/2;
+				ground2.scale.set( 100, 100, 100 );
+
+				ground2.castShadow = false;
+				ground2.receiveShadow = true;
+
+				scene.add( ground2 );
+				renderer = new CSS3DRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.domElement.style.position = 'fixed';
+				
+				container.appendChild( renderer.domElement );
+				camera.lookAt( scene.position );
+
+                const progressBar =document.getElementById('progress-bar');
+                
+                const loadingManager =new THREE.LoadingManager();
+                loadingManager.onProgress =function(url,loaded,total){
+                    progressBar.value = (loaded/total)*100;
+                }
+
+                const progressBarContainer =document.querySelector('.progress-bar-container');
+                console.log(progressBarContainer);
+                loadingManager.onLoad =function(){
+                    progressBarContainer.style.display ='none';
+                }
+				
+				const loader = new GLTFLoader(loadingManager).setPath( 'videos/abc/' );
+				loader.load( 'scene.gltf', function ( gltf ) {
+					gltf.scene.position.set(0,-30,0);
+                    gltf.scene.scale.set(30,30,30);
+					scene.add( gltf.scene );
+					render();
+                    
+				
+				const group = new THREE.Group();
+				group.add( new Element( 'SJOz3qjfQXU',0, 200,600, 3.14/2,0,0 ) );
+				
+				scene.add( group );	
+
+				} );
+				const loader2 = new GLTFLoader().setPath( 'videos/BOARD/' );
+				loader2.load( 'scene.gltf', function ( gltf ) {
+					gltf.scene.position.set(525,120,300);
+                    gltf.scene.scale.set(350,350,350);
+					gltf.scene.rotation.y=3.14/2;
+					scene.add( gltf.scene );
+					render();
+
+				} );
+				const loader_font = new FontLoader();
+				loader_font.load('fonts/gentilis_regular.typeface.json', function ( font ) {
+
+					const textGeo = new TextGeometry( "Somya's Mansion ", {
+						font: font,
+						size: 15,
+						height: 2,
+						curveSegments: 12,
+
+						bevelThickness: .1,
+						bevelSize: .1,
+						bevelEnabled: true
+
+					} );
+					const textMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0xffffff } );
+					const mesh1 = new THREE.Mesh( textGeo, textMaterial );
+					mesh1.position.x = 680;
+					mesh1.position.y = 140;
+					mesh1.position.z = 430;
+                    mesh1.rotation.y = 3.14/2+3.14/9;
+					mesh1.castShadow = true;
+					mesh1.receiveShadow = true;
+					scene.add( mesh1 )
+				});
+					
+				renderer2 = new THREE.WebGLRenderer( { antialias: true } );
+				renderer2.setSize( window.innerWidth, window.innerHeight );
+				renderer2.outputEncoding = THREE.sRGBEncoding;
+				container.appendChild( renderer2.domElement );
+				window.addEventListener( 'resize', onWindowResize );
+				window.addEventListener("click", onClick_change );
+				
+				// Block iframe events when dragging camera
+
+			}
+			function onClick_change() {
+				if(k==1)
+				{camera.position.set( 500,250, 600);
+				k=0;
+				camera.lookAt (0,250, 600 );}
+				else
+				{camera.position.set( 1100, 400, 500 );
+				k=1;
+				camera.lookAt (scene.position);}
+					
+				
+				
+			}
+
+			
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer2.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+				
+				requestAnimationFrame( animate );
+				
+				renderer.render( scene, camera );
+				renderer2.render(scene,camera);
+				
+				
+			}
+			function render() {
+				//get the frame
+				requestAnimationFrame( render );
+				
+		
+				//render the scene
+				
+				animateStars();
+		
+			}
+			function addSphere(){
+
+				// The loop will move from z position of -1000 to z position 1000, adding a random particle at each position. 
+				for ( var z= -1500; z < 1500; z+=20 ) {
+			
+					// Make a sphere (exactly the same as before). 
+					var geometry   = new THREE.SphereGeometry(1.5, 32, 32)
+					var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+					var sphere = new THREE.Mesh(geometry, material)
+			
+					// This time we give the sphere random x and y positions between -500 and 500
+					sphere.position.x = Math.random() * 2000 - 500;
+					sphere.position.z = Math.random() * 2000 - 500;
+			
+					// Then set the z position to where it is in the loop (distance of camera)
+					sphere.position.y = z;
+			
+					// scale it up a bit
+					sphere.scale.x = sphere.scale.z = 2;
+			
+					//add the sphere to the scene
+					scene.add( sphere );
+			
+					//finally push it to the stars array 
+					stars.push(sphere); 
+				}
+				}
+				function animateStars() { 
+			
+					// loop through each star
+					for(var i=0; i<stars.length; i++) {
+						
+						var star = stars[i]; 
+							
+						// and move it forward dependent on the mouseY position. 
+						star.position.y -=  i/10;
+							
+						// if the particle is too close move it to the back
+						if(star.position.y<-100) star.position.y+=600; 
+						
+					}
+				
+				}
+				
+			
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,557 @@
+
+<html lang="en">
+	<head>
+		<title>About Me</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			body{
+				overflow: hidden;
+				background-color: #000000;
+				margin: 0px;
+				background-size:   cover;                 
+				background-repeat: no-repeat;
+ 
+			}
+
+			a {
+				color: #2fa1d6;
+			}
+
+			p {
+				max-width: 600px;
+				margin-left: auto;
+				margin-right: auto;
+				padding: 0 2em;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- Import maps polyfill -->
+		<!-- Remove this when import maps will be widely supported -->
+		<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "./build/three.module.js"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			import * as THREE from 'three';
+
+			import Stats from './jsm/libs/stats.module.js';
+			import { GUI } from './jsm/libs/lil-gui.module.min.js';
+            import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+			import { CSS3DRenderer, CSS3DObject } from './jsm/renderers/CSS3DRenderer.js';
+			import { FontLoader } from './jsm/loaders/FontLoader.js';
+			import { TextGeometry } from './jsm/geometries/TextGeometry.js';
+			import { ShadowMapViewer } from './jsm/utils/ShadowMapViewer.js';
+			
+
+			const SHADOW_MAP_WIDTH = 2048, SHADOW_MAP_HEIGHT = 1024;
+			const image_sources=['./videos/github.jpg','./videos/linkedin.jpg','./videos/leetcode.jpg'];
+            const image_name=['GITHUB','LINKEDIN','LEETCODE'];
+			let container, stats, clock, gui, mixer, actions, activeAction, previousAction;
+			let camera, scene, renderer, model, face,renderer2,scene2;
+            let video, videoImage, videoImageContext, videoTexture;
+			let video2, videoImage2, videoImageContext2, videoTexture2;
+			let video3, videoImage3, videoImageContext3, videoTexture3;
+			let video4, videoImage4, videoImageContext4, videoTexture4;
+			let light, light2,light3,light4,light5;
+			const api = { state: 'Walking' };
+			let current_state = 'Idle';
+			var xSpeed = 0.1;
+			var ySpeed = 0.25;
+			let offset;
+
+			init();
+			animate();
+			
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.25, 200 );
+				camera.position.set( 60, 30, 40 );
+				
+				scene = new THREE.Scene();
+
+				clock = new THREE.Clock();
+
+
+				// lights
+
+				
+				const dirLight = new THREE.DirectionalLight( 0xffffff,0.05 );
+				dirLight.position.set( 0, 20, 10 );
+				scene.add( dirLight );
+
+				light2 = new THREE.SpotLight( 0xab5cff,10, 0, Math.PI / 5, 0.3 );
+				light2.position.set(20, 10, 0);
+				light2.target.position.set( 20, 0 ,0);
+				light2.castShadow = true;
+				light2.shadow.camera.near = 100;
+				light2.shadow.camera.far = 500;
+				light2.shadow.bias = 0.0001;
+				light2.shadow.mapSize.width = SHADOW_MAP_WIDTH;
+				light2.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
+				scene.add( light2 );
+				scene.add( light2.target );
+				light = new THREE.SpotLight( 0xab5cff,2, 0, Math.PI / 5, 0.3 );
+				light.position.set(40, 0, 30);
+				light.target.position.set( 0, 15 ,15);
+				light.castShadow = true;
+				light.shadow.camera.near = 100;
+				light.shadow.camera.far = 500;
+				light.shadow.bias = 0.0001;
+				light.shadow.mapSize.width = SHADOW_MAP_WIDTH;
+				light.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
+                light3 = new THREE.SpotLight( 0xab5cff,3, 0, Math.PI / 5, 0.3 );
+				light3.position.set(40, 0, 80);
+				light3.target.position.set( 0, 15 ,70);
+				light3.castShadow = true;
+				light3.shadow.camera.near = 100;
+				light3.shadow.camera.far = 500;
+				light3.shadow.bias = 0.0001;
+				light3.shadow.mapSize.width = SHADOW_MAP_WIDTH;
+				light3.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
+
+				light4 = new THREE.SpotLight( 0xab5cff,3, 0, Math.PI / 5, 0.3 );
+				light4.position.set(20, 70, 110);
+				light4.target.position.set( 10, 0 ,120);
+				light4.castShadow = true;
+				light4.shadow.camera.near = 100;
+				light4.shadow.camera.far = 500;
+				light4.shadow.bias = 0.0001;
+				light4.shadow.mapSize.width = SHADOW_MAP_WIDTH;
+				light4.shadow.mapSize.height = SHADOW_MAP_HEIGHT;
+				const loader = new GLTFLoader();
+				loader.load( './board/collision.glb', function ( gltf ) {
+                    
+                    gltf.scene.position.set(-5,0,10);
+                    gltf.scene.scale.set(10,5,8);	
+                    gltf.scene.rotateX(-3.14/2);
+                    gltf.scene.rotateZ(3.14/4);
+                    scene.add( gltf.scene );
+                });
+
+                 const loader2 = new GLTFLoader();
+                 loader2.load( './board/collision.glb', function ( gltf ) {
+                     
+                     gltf.scene.position.set(-5,0,70);
+                     gltf.scene.scale.set(10,5,8);	
+                     gltf.scene.rotateX(-3.14/2);
+                     gltf.scene.rotateZ(3.14/4);
+                     scene.add( gltf.scene );
+                                     } );
+            	const loader5 = new GLTFLoader();
+				loader5.load( 'models/gltf/RobotExpressive/RobotExpressive.glb', function ( gltf ) {
+
+					model = gltf.scene;
+                    model.scale.set(1.5,1.5,1.5);
+                    model.position.set(20,0,0);
+					scene.add( model );
+					createGUI( model, gltf.animations );
+					}, undefined, function ( e ) {
+
+					console.error( e );
+
+				} );
+				const loader6 = new GLTFLoader();
+				loader6.load( 'videos/ground/scene.gltf', function ( gltf ) {
+
+					let model2 = gltf.scene;
+                    model2.scale.set(25,.2,25);
+                    model2.position.set(0,0,0);
+					scene.add( model2 );
+					}, undefined, function ( e ) {
+
+					console.error( e );
+
+				} );
+				const loader7 = new GLTFLoader();
+				loader7.load( 'videos/ground/scene.gltf', function ( gltf ) {
+
+					let model3 = gltf.scene;
+                    model3.scale.set(25,.2,25);
+                    model3.position.set(0,0,50);
+					scene.add( model3 );
+					
+					}, undefined, function ( e ) {
+					console.error( e );
+
+				} );
+				const loader9 = new GLTFLoader();
+				loader9.load( 'videos/ground/scene.gltf', function ( gltf ) {
+
+					let model4 = gltf.scene;
+                    model4.scale.set(25,.2,25);
+                    model4.position.set(0,0,100);
+					scene.add( model4 );
+					}, undefined, function ( e ) {
+
+					console.error( e );
+
+				} );
+				const loader8 = new GLTFLoader();
+				loader8.load( 'videos/ground/scene.gltf', function ( gltf ) {
+
+					let model5 = gltf.scene;
+                    model5.scale.set(25,.2,25);
+                    model5.position.set(0,0,150);
+					scene.add( model5 );
+					
+					}, undefined, function ( e ) {
+					console.error( e );
+
+				} );
+			  offset=95;
+				for(var i=0;i<3;i++)
+                {   var st ="texture"+i;
+                    st= new THREE.TextureLoader().load( image_sources[i] );
+                    var geo ="geometry"+i;
+                    geo = new THREE.BoxGeometry( 10,10,10);
+                    var mat ="material"+i;
+                    mat = new THREE.MeshBasicMaterial( { map: st } );
+                    var m="mesh"+1;
+                     m = new THREE.Mesh( geo, mat );
+                    m.position.x=0;
+                    m.position.y=5;
+                    m.position.z=offset;
+                    scene.add( m );
+                    offset+=20;
+                }
+				const loader_font2 = new FontLoader();
+                offset =10;
+				let j=0;
+				loader_font2.load('fonts/helvetiker_bold.typeface.json', function ( font ) {
+					for(var i=0;i<3;i++)
+					{const textGeo = new TextGeometry( image_name[i], {
+	
+						font: font,
+						size: 2.5,
+						height: 2,
+						curveSegments: 12,
+	
+						bevelThickness: .1,
+						bevelSize: .1,
+						bevelEnabled: true
+	
+					} );
+					const textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0xffffff } );
+						const mesh1 = new THREE.Mesh( textGeo, textMaterial );
+						mesh1.position.x = 0;
+						mesh1.position.y = 10;
+						mesh1.position.z = 90 +offset + j;
+						mesh1.rotation.y = 3.14/2;
+						mesh1.castShadow = true;
+						mesh1.receiveShadow = true;
+						offset +=20;
+						scene.add( mesh1 );
+						
+						
+					}})
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.outputEncoding = THREE.sRGBEncoding;
+				renderer.domElement.style.top = 0;
+				renderer.domElement.style.zIndex = '1';
+				container.appendChild( renderer.domElement );
+
+				window.addEventListener( 'resize', onWindowResize );
+
+				// stats
+				stats = new Stats();
+				container.appendChild( stats.dom );
+
+				
+				
+				//font on screen 1
+				const loader_font = new FontLoader();
+				loader_font.load('fonts/helvetiker_bold.typeface.json', function ( font ) {
+
+					const textGeo = new TextGeometry( 'ABOUT ME', {
+
+						font: font,
+						size: 2,
+						height: 2,
+						curveSegments: 12,
+						bevelThickness: .1,
+						bevelSize: .1,
+						bevelEnabled: true
+
+					} );
+                    const textGeo2 = new TextGeometry( " Hello, I'm SOMYA SINGHAL,\n a Final Year Undergraduate student \n with Computer Science Major.\n A creative web developer \n who loves to build, experiment \n and create new dynamic websites", {
+
+						font: font,
+						size: 1.5,
+						height: 2,
+						curveSegments: 12,
+						bevelThickness: .1,
+						bevelSize: .1,
+						bevelEnabled: true
+                        
+
+					} );
+                    
+					const textGeo3 = new TextGeometry( 'CONTACT ME', {
+
+						font: font,
+						size: 2,
+						height: 2,
+						curveSegments: 12,
+
+						bevelThickness: .1,
+						bevelSize: .1,
+						bevelEnabled: true
+
+					} );
+                    const textGeo4 = new TextGeometry( " E- Mail - singhalsomya14@gmail.com \n Phone No. - 9634707333", {
+
+						font: font,
+						size: 1.5,
+						height: 2,
+						curveSegments: 12,
+
+						bevelThickness: .1,
+						bevelSize: .1,
+						bevelEnabled: true
+                        
+
+					} );
+					const textMaterial = new THREE.MeshPhongMaterial( { color: 0xff0000, specular: 0xffffff } );
+					const mesh1 = new THREE.Mesh( textGeo, textMaterial );
+					mesh1.position.x = -7;
+					mesh1.position.y = 25;
+					mesh1.position.z = 16;
+					mesh1.rotation.y = 3.14/3;
+					mesh1.castShadow = true;
+					mesh1.receiveShadow = true;
+					scene.add( mesh1);	
+                    const mesh2= new THREE.Mesh( textGeo2, textMaterial );
+					mesh2.position.x = -13;
+					mesh2.position.y = 20;
+					mesh2.position.z = 25;
+					mesh2.rotation.y = 3.14/3;
+					mesh2.castShadow = true;
+					mesh2.receiveShadow = true;
+					scene.add( mesh2);	
+                    const mesh3 = new THREE.Mesh( textGeo3, textMaterial );
+					mesh3.position.x = -7;
+					mesh3.position.y = 25;
+					mesh3.position.z = 16+60;
+					mesh3.rotation.y = 3.14/3;
+					mesh3.castShadow = true;
+					mesh3.receiveShadow = true;
+					scene.add( mesh3);	
+                    const mesh4= new THREE.Mesh( textGeo4, textMaterial );
+					mesh4.position.x = -13;
+					mesh4.position.y = 20;
+					mesh4.position.z = 25+60;
+					mesh4.rotation.y = 3.14/3;
+					mesh4.castShadow = true;
+					mesh4.receiveShadow = true;
+					scene.add( mesh4);	
+				});
+				const controls = new OrbitControls( camera, renderer.domElement );
+				controls.enablePan = true;
+				controls.minDistance = 5;
+				controls.maxDistance = 500;
+				document.addEventListener("keydown", onDocumentKeyDown, false);
+			}
+			function onDocumentKeyDown(event) {
+				
+				var keyCode = event.which;
+				if(model.position.z >10)
+				{
+					scene.add( light );
+					scene.add( light.target );
+				}
+				if(model.position.z >50)
+				{
+					scene.add( light3 );
+					scene.add( light3.target );
+				}
+				if(model.position.z >90)
+				{
+					scene.add( light4 );
+					scene.add( light4.target );
+				}
+				
+				if((model.position.z > 10 && model.position.z< 10.5) || (model.position.z > 50 && model.position.z< 50.5) ||(model.position.z > 90 && model.position.z< 90.5) || (model.position.z > 130 && model.position.z< 130.5))
+				{ 
+					current_state='ThumbsUp';
+					fadeToAction('Jump',0.5);
+					fadeToAction('Walking',0.5);			
+				}
+				if (keyCode == 38) {
+					model.rotation.set(0,0,0);
+					model.position.z += ySpeed;
+					camera.position.set( camera.position.x, camera.position.y, camera.position.z+ ySpeed );
+					light2.position.set(20, 10, model.position.z);
+					light2.target.position.set(20, 0 ,model.position.z);
+					scene.add(light2.target);
+				} 
+				
+				else if (keyCode == 40 ) {
+					model.rotation.set(0,3.14,0);
+					model.position.z -= ySpeed;
+					camera.position.set( camera.position.x, camera.position.y, camera.position.z- ySpeed );
+					light2.position.set(20, 10, model.position.z);
+					light2.target.position.set(20, 0 ,model.position.z);
+					scene.add(light2.target);
+				}
+				if ( keyCode == 49  ) 
+				{//1
+					window.open('https://github.com/Somya-Singhal','_parent');
+				}
+				else if ( keyCode == 50  ) 
+				{//2
+					window.open('https://in.linkedin.com/in/somya-singhal-a110091b9','_parent');
+				}
+				else if ( keyCode == 51  ) 
+				{//3
+					window.open('https://leetcode.com/Somya-Singhal/','_parent');
+				}
+				else if ( keyCode == 52  ) 
+				{//4
+					//window.open('Ros.html','_parent');
+				}
+				
+				render();
+				
+			};
+
+			function createGUI( model, animations ) {
+
+				const states = [ 'Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing' ];
+				const emotes = [ 'Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp' ];
+
+				gui = new GUI();
+
+				mixer = new THREE.AnimationMixer( model );
+
+				actions = {};
+				
+
+				for ( let i = 0; i < animations.length; i ++ ) {
+
+					const clip = animations[ i ];
+					const action = mixer.clipAction( clip );
+					actions[ clip.name ] = action;
+                    
+					if ( emotes.indexOf( clip.name ) >= 0 || states.indexOf( clip.name ) >= 4 ) {
+
+						action.clampWhenFinished = true;
+						action.loop = THREE.LoopOnce;
+
+					}
+
+				}
+
+				// states
+
+				var options = {
+					Move_Forward: '↑',
+					Move_Backward: '↓',
+					Move_Left: '←',
+					Move_Right: '→'
+				  }
+				var options2 = {
+					GO_TO: 'Press-Key',
+					Autonomous_Robot: '1',
+					Code_Editor: '2',
+					Portfolio_Website: '3',
+					School_Mgmt_System: '4'
+				  }
+				const statesFolder = gui.addFolder( 'ROBOT CONTROL' );  
+				statesFolder.add(options, 'Move_Forward');
+				statesFolder.add(options, 'Move_Backward');
+				var options2 = {
+					Project: 'Press-Key',
+					Github: '1',
+					LINKEDIN: '2',
+					LEETCODE: '3',
+					
+				  }
+				  const statesFolder2 = gui.addFolder( 'GO TO LINK' );  
+				statesFolder2.add(options2, 'GO _TO');
+				statesFolder2.add(options2, 'Github');
+				statesFolder2.add(options2, 'LINKEDIN');
+				statesFolder2.add(options2, 'LEETCODE');
+				
+				statesFolder.open();
+
+				
+
+				// emotes
+
+
+				function restoreState() {
+
+					mixer.removeEventListener( 'finished', restoreState );
+
+					fadeToAction( api.state, 0.2 );
+
+				}				
+				activeAction = actions[ 'Walking' ];
+				activeAction.play();
+
+			}
+
+			function fadeToAction( name, duration ) {
+
+				previousAction = activeAction;
+				activeAction = actions[ name ];
+
+				if ( previousAction !== activeAction ) {
+
+					previousAction.fadeOut( duration );
+
+				}
+
+				activeAction
+					.reset()
+					.setEffectiveTimeScale( 1 )
+					.setEffectiveWeight( 1 )
+					.fadeIn( duration )
+					.play();
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				
+
+			}
+			
+			function render() {
+						renderer.render( scene, camera );
+			}
+			function animate() {
+
+				const dt = clock.getDelta();
+				if ( mixer ) mixer.update( dt );
+				requestAnimationFrame( animate );
+				render();
+			}
+
+
+		</script>
+
+	</body>
+</html>
+

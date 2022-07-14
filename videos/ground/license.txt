@@ -1,0 +1,11 @@
+Model Information:
+* title:	Tile Texture on a Square
+* source:	https://sketchfab.com/3d-models/tile-texture-on-a-square-5b61e9c13b144741b57825dd2f9c2cd2
+* author:	scribeofvoid (https://sketchfab.com/scribeofvoid)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Tile Texture on a Square" (https://sketchfab.com/3d-models/tile-texture-on-a-square-5b61e9c13b144741b57825dd2f9c2cd2) by scribeofvoid (https://sketchfab.com/scribeofvoid) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
