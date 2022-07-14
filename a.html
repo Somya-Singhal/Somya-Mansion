@@ -1,0 +1,44 @@
+<html>  
+<head>  
+<title> Entry Page</title>  
+</head>  
+<body align="center" >  
+<h1> ARE YOU A RECRUITER???</h1>  
+<table cellspacing="2" align="center" cellpadding="8" border="0">  
+<tr><td> Name</td>   
+<td><input type="text" placeholder="Please Enter your name" id="n1"></td></tr>  
+<tr><td>Email </td>  
+<td><input type="text" placeholder="Please Enter your email id" id="e1"></td></tr>
+<tr><td>Organisation(if Possible) </td>  
+<td><input type="text" placeholder="Please Enter your organisation" id="o1"></td></tr>      
+<input type="submit" value="Move On" onClick="create_account()"/>  
+</table>
+<h1>Please Fill this Form to Enter the Mansion</h1>  
+<script type="text/javascript">  
+function create_account()
+{  
+var n=document.getElementById("n1").value;  
+var e=document.getElementById("e1").value;  
+var p=document.getElementById("o1").value;
+  
+ 
+if(n==''){  
+alert("Atleast Please Enter your name  :-(");  
+}   
+else{ 
+localStorage.setItem("yname", n.toUpperCase()); 
+
+alert("Thank you....Taking you to Journey");
+window.open('page2.html','_parent');
+}  
+window.addEventListener("click", onClick_change );
+}  
+function onClick_change(event) {
+    console.log(event.target);
+        
+    
+    
+}
+</script>  
+</body>  
+</html> 
